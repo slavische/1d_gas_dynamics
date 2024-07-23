@@ -9,7 +9,6 @@ program sample
    use gas_dynamics
    use riemann_problem
    implicit none
-   character(len = 40) :: input_file_name
    character(len = 40) :: output_file_name
    double precision, allocatable :: x(:)
    double precision, allocatable :: xc(:)
@@ -21,9 +20,7 @@ program sample
    integer :: i
 
    ! Чтение файла с исходными данными
-   print *, 'Введите имя файла c исходными данными (пример test1.dat):'
-   read(*, '(A)') input_file_name
-   call read_input_file(trim(adjustl(input_file_name)))
+   call read_input_file()
 
    ! Создание расчетной сетки
    call generate_grid(N_CELLS, X_MIN, X_MAX, x, xc)

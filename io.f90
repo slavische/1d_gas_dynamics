@@ -19,11 +19,10 @@ module io
 
 contains
 
-   subroutine read_input_file(file_name)
+   subroutine read_input_file()
       implicit none
-      character(len = 20), intent(in) :: file_name
 
-      open(unit = 10, file = file_name, status = 'old', action = 'read')
+      open(unit = 10, file = 'input.dat', status = 'old', action = 'read')
 
       read(10,*)
       read(10, '(22x, ES12.5)') X_MIN
