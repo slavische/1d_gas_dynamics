@@ -21,7 +21,7 @@ program sample
    integer :: i
 
    ! Чтение файла с исходными данными
-   print *, 'Введите имя файла исходными данными (пример test1.dat):'
+   print *, 'Введите имя файла c исходными данными (пример test1.dat):'
    read(*, '(A)') input_file_name
    call read_input_file(trim(adjustl(input_file_name)))
 
