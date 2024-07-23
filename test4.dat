@@ -1,0 +1,21 @@
+GEOMETRY
+  X_MIN               -0.5     
+  X_MAX               0.5
+  N_CEELS             500
+INITIAL CONDITION
+LEFT
+  DENSITY_LEFT        5.99924       
+  VELOCITY_LEFT       19.5975       
+  PRESSURE_LEFT       460.894      
+  GAMMA_LEFT          1.4       
+RIGHT
+  DENSITY_RIGHT       5.99242     
+  VELOCITY_RIGHT      -6.19633     
+  PRESSURE_RIGHT      46.0950      
+  GAMMA_RIGHT         1.4 
+CONCULATION PARAMETERS
+  END_TIME            0.035       
+  TIME_STEP           1.0       
+  CFL                 0.4 
+  CFL0_NUM_STEP       10        
+  CFL0                0.02      
