@@ -16,7 +16,7 @@ contains
       ! Eleuterio F. Toro Riemann Solvers and Numerical Methods for Fluid Dynamics
       ! текущая реализация только для постоянной гаммы
       ! Compute gamma related constants
-      ! TO DO: переработать для произвольных гамма
+      ! TODO: переработать для произвольных гамма
       GAMMA = WL%gamma
       G1 = (GAMMA - 1.0)/(2.0*GAMMA)
       G2 = (GAMMA + 1.0)/(2.0*GAMMA)
