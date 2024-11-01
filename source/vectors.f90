@@ -1,61 +1,87 @@
 module vectors
+   use iso_fortran_env, only: real64
    implicit none
-   ! вектор консервативных переменных
-   type :: vector_conservative_vars
-      double precision :: mass         ! масса
-      double precision :: momentum     ! импульс
-      double precision :: energy       ! энергия
-      double precision :: gamma        ! показатель адиабаты
+   private
+
+   public::conservative_vars_t, nonconservative_vars_t, calculate_fluxes
+   !> вектор консервативных переменных
+   !> TODO: Добавить размерность к полям
+   type::conservative_vars_t
+      private
+      real(kind=real64), public::mass     !< масса
+      real(kind=real64), public::momentum !< импульс
+      real(kind=real64), public::energy   !< энергия
+      real(kind=real64), public::gamma    !< показатель адиабаты
+   contains
+      private
+      procedure, public::to_nonconservative => conservative_t_to_nonconservative_t
    end type
 
-   ! вектор примитивных переменных
-   type :: vector_nonconservative_vars
-      double precision :: density      ! плотность
-      double precision :: velocity     ! скорость
-      double precision :: pressure     ! давление
-      double precision :: gamma        ! показатель адиабаты
+   !> вектор примитивных переменных
+   !> TODO: Добавить размерность к полям
+   type::nonconservative_vars_t
+      private
+      real(kind=real64), public::density    ! плотность
+      real(kind=real64), public::velocity   ! скорость
+      real(kind=real64), public::pressure   ! давление
+      real(kind=real64), public::gamma      ! показатель адиабаты
+   contains
+      private
+      procedure, public::to_conservative => nonconservative_t_to_conservative_t
    end type
-
 
 contains
 
-   function convert_cons_to_noncons(cons_vars) result(noncons_vars)
-      type (vector_conservative_vars), intent(in) :: cons_vars
-      double precision :: internal_energy
-      type (vector_nonconservative_vars) :: noncons_vars
+   function conservative_t_to_nonconservative_t(self) result(nonconservative_vars)
+      ! Входные данные
+      class(conservative_vars_t), intent(in)::self
+      ! Выходные данные
+      type(nonconservative_vars_t)::nonconservative_vars
+      ! Промежуточные данные
+      real(kind=real64)::internal_energy
 
-      noncons_vars%density = cons_vars%mass
-      noncons_vars%velocity = cons_vars%momentum / cons_vars%mass
-      internal_energy = cons_vars%energy / cons_vars%mass - 0.5 * noncons_vars%velocity ** 2.
-      noncons_vars%pressure = noncons_vars%density * internal_energy * ( cons_vars%gamma - 1.)
-      noncons_vars%gamma = cons_vars%gamma
+      nonconservative_vars%density = self%mass
+      nonconservative_vars%velocity = self%momentum/self%mass
+      internal_energy = self%energy/self%mass - 0.5*nonconservative_vars%velocity**2.
+      nonconservative_vars%pressure = nonconservative_vars%density*internal_energy*(self%gamma - 1.)
+      nonconservative_vars%gamma = self%gamma
 
-   end function convert_cons_to_noncons
+   end function conservative_t_to_nonconservative_t
 
-   function convert_noncons_to_cons(noncons_vars) result(cons_vars)
-      type (vector_nonconservative_vars), intent(in) ::  noncons_vars
-      double precision :: internal_energy
-      type (vector_conservative_vars) :: cons_vars
+   ! =======================================================================================================
+   ! =======================================================================================================
+   ! =======================================================================================================
 
-      cons_vars%mass = noncons_vars%density
-      cons_vars%momentum = noncons_vars%density * noncons_vars%velocity
-      internal_energy = noncons_vars%pressure / noncons_vars%density / (noncons_vars%gamma - 1.)
-      cons_vars%energy = noncons_vars%density * ( internal_energy + 0.5 * noncons_vars%velocity ** 2. )
-      cons_vars%gamma = noncons_vars%gamma
+   function nonconservative_t_to_conservative_t(self) result(conservative_vars)
+      ! Входные данные
+      class(nonconservative_vars_t), intent(in)::self
+      ! Выходные данные
+      type(conservative_vars_t) :: conservative_vars
+      ! Промежуточные данные
+      real(kind=real64)::internal_energy
 
-   end function convert_noncons_to_cons
+      conservative_vars%mass = self%density
+      conservative_vars%momentum = self%density*self%velocity
+      internal_energy = self%pressure/self%density/(self%gamma - 1.)
+      conservative_vars%energy = self%density*(internal_energy + 0.5*self%velocity**2.)
+      conservative_vars%gamma = self%gamma
 
-   function calc_vector_fluxes( noncons_vars ) result(fluxes)
-      type (vector_nonconservative_vars) :: noncons_vars
-      type (vector_conservative_vars) :: fluxes
-      double precision :: internal_energy
+   end function nonconservative_t_to_conservative_t
 
-      fluxes%mass = noncons_vars%density * noncons_vars%velocity
-      fluxes%momentum = fluxes%mass * noncons_vars%velocity + noncons_vars%pressure
-      internal_energy = noncons_vars%pressure / noncons_vars%density / (noncons_vars%gamma - 1.)
-      fluxes%energy = fluxes%mass * ( internal_energy + 0.5 * noncons_vars%velocity ** 2.) + noncons_vars%pressure*noncons_vars%velocity
-      fluxes%gamma = noncons_vars%gamma * noncons_vars%velocity
-      
-   end function calc_vector_fluxes
+   function calculate_fluxes(self) result(fluxes)
+      ! Входные данные
+      class(nonconservative_vars_t)::self
+      ! Выходные данные
+      type(conservative_vars_t)::fluxes
+      ! Промежуточные данные
+      real(kind=real64)::internal_energy
+
+      fluxes%mass = self%density*self%velocity
+      fluxes%momentum = fluxes%mass*self%velocity + self%pressure
+      internal_energy = self%pressure/self%density/(self%gamma - 1.)
+      fluxes%energy = fluxes%mass*(internal_energy + 0.5*self%velocity**2.) + self%pressure*self%velocity
+      fluxes%gamma = self%gamma*self%velocity
+
+   end function calculate_fluxes
 
 end module vectors
