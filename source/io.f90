@@ -53,7 +53,7 @@ contains
    subroutine write_solution(xc, solution, file_name)
       use vectors
       double precision, intent(in) :: xc(:)
-      type (vector_nonconservative_vars), intent(in) :: solution(:)
+      type (nonconservative_vars_t), intent(in) :: solution(:)
       character(len = 20), intent(in) :: file_name
       integer :: i
 

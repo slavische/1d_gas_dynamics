@@ -1,5 +1,8 @@
 module utils
    implicit none
+   private
+
+   public::generate_grid, init_solution, calc_sound_speed, calc_time_step
 
 contains
 
@@ -10,28 +13,28 @@ contains
       double precision :: h
       integer :: i
 
-      allocate(x(n + 1), xc(n))
+      allocate (x(n + 1), xc(n))
 
-      h = ( x_max - x_min ) / n                       ! шаг по пространственной коорлдинате
-      x = [ (x_min + ( i - 1) * h, i = 1, n + 1 ) ]   ! координаты границ расчетных ячеек
-      xc = [ (0.5 * ( x(i) + x(i + 1) ), i = 1, n) ]  ! координаты центров расчетных ячеек
+      h = (x_max - x_min)/n                       ! шаг по пространственной коорлдинате
+      x = [(x_min + (i - 1)*h, i=1, n + 1)]   ! координаты границ расчетных ячеек
+      xc = [(0.5*(x(i) + x(i + 1)), i=1, n)]  ! координаты центров расчетных ячеек
 
    end subroutine generate_grid
 
    subroutine init_solution(xc, gamma_left, density_left, velocity_left, pressure_left, &
-      gamma_right, density_right, velocity_right, pressure_right, solution)
+                            gamma_right, density_right, velocity_right, pressure_right, solution)
       use vectors
       double precision, intent(in) :: xc(:)
       double precision, intent(in) :: gamma_left, density_left, velocity_left, pressure_left
       double precision, intent(in) :: gamma_right, density_right, velocity_right, pressure_right
-      type (vector_nonconservative_vars), allocatable, intent(out) :: solution(:)
+      type(nonconservative_vars_t), allocatable, intent(out) :: solution(:)
       integer :: n_cells
       integer :: i
 
-      n_cells = size(xc, dim = 1)
-      allocate(solution(n_cells))
+      n_cells = size(xc, dim=1)
+      allocate (solution(n_cells))
       do i = 1, n_cells
-         if ( xc(i) < 0. ) then
+         if (xc(i) < 0.) then
             solution(i)%density = density_left
             solution(i)%velocity = velocity_left
             solution(i)%pressure = pressure_left
@@ -52,28 +55,25 @@ contains
       double precision, intent(in) :: pressure
       double precision :: sound_speed
 
-      sound_speed = dsqrt( gamma * pressure / density )
+      sound_speed = dsqrt(gamma*pressure/density)
    end function calc_sound_speed
-
 
    function calc_time_step(x, W, cfl) result(time_step)
       use vectors
       double precision, intent(in) :: x(:)
-      type(vector_nonconservative_vars), intent(in) :: W(:)
+      type(nonconservative_vars_t), intent(in) :: W(:)
       double precision, intent(in) :: cfl
       double precision :: time_step
       integer :: i
       double precision :: current_step = 1.
 
-      do i = 1, size(W, dim = 1)
-         time_step = ( x(i+1) - x(i) ) / dabs( W(i)%velocity + calc_sound_speed( W(i)%gamma, W(i)%density, W(i)%pressure ) )
-         if ( time_step < current_step ) then
+      do i = 1, size(W, dim=1)
+         time_step = (x(i + 1) - x(i))/dabs(W(i)%velocity + calc_sound_speed(W(i)%gamma, W(i)%density, W(i)%pressure))
+         if (time_step < current_step) then
             current_step = time_step
          end if
       end do
-      time_step = cfl * current_step
+      time_step = cfl*current_step
    end function calc_time_step
-
-
 
 end module utils

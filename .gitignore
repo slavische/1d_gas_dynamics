@@ -1,12 +1,2 @@
-# Ignore all
-*
-
-# Unignore all with extensions
-!*.*
-
-# Unignore all dirs
-!*/*.o
-*.mod
-solution.dat
-exact_solution.dat
-run
+.vscode
+build
